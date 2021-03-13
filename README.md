@@ -1,7 +1,7 @@
 # twitter-notification-on-line
 
 ### 依存関係
-- ライブラリ
+- GASライブラリ
   - OAuth1
 - API
   - Twitter API
