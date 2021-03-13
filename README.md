@@ -3,6 +3,9 @@
 ### 依存関係
 - ライブラリ
   - OAuth1
+- API
+  - Twitter API
+  - LINE Notify API
 
 ### GASの設定
 - OAuth1ライブラリを追加
