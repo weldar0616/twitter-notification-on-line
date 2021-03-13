@@ -1,4 +1,3 @@
-
 function twitterAuthorizeUrl() {
   Twitter.oauth.showUrl();
 }
@@ -19,25 +18,13 @@ class MyOAuth {
   }
 
   service(screen_name) {
-    // 参照元：https://github.com/googlesamples/apps-script-oauth2
     return OAuth1.createService(this.name)
-      // Set the endpoint URLs.
       .setAccessTokenUrl('https://api.twitter.com/oauth/access_token')
       .setRequestTokenUrl('https://api.twitter.com/oauth/request_token')
       .setAuthorizationUrl('https://api.twitter.com/oauth/authorize')
-
-      // Set the consumer key and secret.
       .setConsumerKey(this.parent.consumerKey)
       .setConsumerSecret(this.parent.consumerSecret)
-
-      // Set the project key of the script using this library.
-      //.setProjectKey(this.parent.projectKey)
-
-      // Set the name of the callback function in the script referenced
-      // above that should be invoked to complete the OAuth flow.
       .setCallbackFunction('twitterAuthorizeCallback')
-
-      // Set the property store where authorized tokens should be persisted.
       .setPropertyStore(PropertiesService.getUserProperties());
   }
 
@@ -54,9 +41,9 @@ class MyOAuth {
     const service = this.service();
     const isAuthorized = service.handleCallback(request);
     if (isAuthorized) {
-      return HtmlService.createHtmlOutput("認証に成功しました。このタブは閉じて構いません。");
+      return HtmlService.createHtmlOutput(Dict.oauth.authorized);
     } else {
-      return HtmlService.createHtmlOutput("認証に失敗しました");
+      return HtmlService.createHtmlOutput(Dict.oauth.rejected);
     }
   }
 
@@ -69,9 +56,10 @@ class MyOAuth {
 
 const Twitter = new class {
   constructor() {
-    this.projectKey = PropertiesService.getScriptProperties().getProperty("PROJECT_KEY");
-    this.consumerKey = PropertiesService.getScriptProperties().getProperty("API_KEY");
-    this.consumerSecret = PropertiesService.getScriptProperties().getProperty("API_SECRET");
+    const scriptProps = PropertiesService.getScriptProperties();
+    this.projectKey = scriptProps.getProperty("PROJECT_KEY");
+    this.consumerKey = scriptProps.getProperty("API_KEY");
+    this.consumerSecret = scriptProps.getProperty("API_SECRET");
     this.apiUrl = "https://api.twitter.com/1.1/";
 
     this.oauth = new MyOAuth();
@@ -81,11 +69,18 @@ const Twitter = new class {
   api(path, data) {
     const that = this, service = this.oauth.service();
     if (!service.hasAccess()) {
-      Logger.log("先にOAuth認証してください");
+      Logger.log(Dict.twitter.loginRejected);
       return false;
     }
 
     path = path.toLowerCase().replace(/^\//, '').replace(/\.json$/, '');
+
+    // TODO: video upload
+    if (path == "media/upload") {
+      this.apiUrl = "https://upload.twitter.com/1.1/";
+    } else {
+      this.apiUrl = "https://api.twitter.com/1.1/";
+    }
 
     const method = (
       /^statuses\/(destroy\/\d+|update|retweet\/\d+)/.test(path)
@@ -115,7 +110,6 @@ const Twitter = new class {
     } else if ("post" == method) {
       if (!this.isEmpty(data)) {
         options.payload = Object.keys(data).map(key => that.encodeRfc3986(key) + '=' + that.encodeRfc3986(data[key])).join('&');
-
         if (data.media) {
           options.contentType = "multipart/form-data;charset=UTF-8";
         }
@@ -247,4 +241,13 @@ const Twitter = new class {
     }
     return this.api(path, data);
   };
+
+  // ツイートを取得
+  showTweet(tweet_id) {
+    const path = "statuses/show";
+    const data = { id: tweet_id };
+    return this.api(path, data);
+  }
+
+  // *** ↓ API呼び出し口を追加 ***
 }();
