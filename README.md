@@ -1,5 +1,20 @@
 # twitter-notification-on-line
 
+特定のユーザに関するTwitterデータの通知・保存を行うアプリケーション
+
+### 機能
+- プロフィール・ヘッダー画像の更新とその内容をLINEに通知し、画像データをGoogleDriveに保存
+- bioの更新とその内容をLINEに通知し、Googleスプレッドシートに記録
+- 新規ツイートの内容をLINEに通知し、Googleスプレッドシートに記録。画像や動画が添付されている場合はGoogleDriveに保存
+- 新規いいねの内容をLINEに通知
+- 新規フォローの内容をLINEに通知
+- 特定の検索結果の内容をLINEに通知し、Googleスプレッドシートに記録
+- 特定のユーザのフォロー、フォロワー、いいね数の遷移を、毎日0時にスプレッドシートに保存しグラフ化
+
+<img src="https://i.imgur.com/ivLcADT.jpg" height="150">
+
+<img src="https://i.imgur.com/WHFffPb.png" alt="attach:cat" title="attach:cat" height="150">
+
 ### 依存関係
 - GASライブラリ
   - OAuth1
@@ -22,3 +37,4 @@
 - Authentication settings > Callback URLsを指定
   - `https://script.google.com/macros/d/[GASスクリプトID]/usercallback callbaclurl`
 - App permissions > **Read and Write**に設定
+
