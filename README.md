@@ -13,7 +13,7 @@
 
 <img src="https://i.imgur.com/ivLcADT.jpg" height="150">
 
-<img src="https://i.imgur.com/WHFffPb.png" alt="attach:cat" title="attach:cat" height="150">
+<img src="https://i.imgur.com/WHFffPb.png" height="150">
 
 ### 依存関係
 - GASライブラリ
