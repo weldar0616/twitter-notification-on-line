@@ -1,4 +1,4 @@
-# twitter-notification-on-line
+# [GAS] twitter-notification-on-line
 
 特定のユーザに関するTwitterデータの通知・保存を行うアプリケーション
 
