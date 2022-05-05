@@ -19,12 +19,12 @@ class MyOAuth {
 
   service(screen_name) {
     return OAuth1.createService(this.name)
-      .setAccessTokenUrl('https://api.twitter.com/oauth/access_token')
-      .setRequestTokenUrl('https://api.twitter.com/oauth/request_token')
-      .setAuthorizationUrl('https://api.twitter.com/oauth/authorize')
+      .setAccessTokenUrl("https://api.twitter.com/oauth/access_token")
+      .setRequestTokenUrl("https://api.twitter.com/oauth/request_token")
+      .setAuthorizationUrl("https://api.twitter.com/oauth/authorize")
       .setConsumerKey(this.parent.consumerKey)
       .setConsumerSecret(this.parent.consumerSecret)
-      .setCallbackFunction('twitterAuthorizeCallback')
+      .setCallbackFunction("twitterAuthorizeCallback")
       .setPropertyStore(PropertiesService.getUserProperties());
   }
 
@@ -41,9 +41,11 @@ class MyOAuth {
     const service = this.service();
     const isAuthorized = service.handleCallback(request);
     if (isAuthorized) {
-      return HtmlService.createHtmlOutput('認証に成功しました。このタブは閉じて構いません。');
+      return HtmlService.createHtmlOutput(
+        "認証に成功しました。このタブは閉じて構いません。"
+      );
     } else {
-      return HtmlService.createHtmlOutput('認証に失敗しました。');
+      return HtmlService.createHtmlOutput("認証に失敗しました。");
     }
   }
 
@@ -54,7 +56,7 @@ class MyOAuth {
   }
 }
 
-const Twitter = new class {
+const Twitter = new (class {
   constructor() {
     const scriptProps = PropertiesService.getScriptProperties();
     this.projectKey = scriptProps.getProperty("PROJECT_KEY");
@@ -67,13 +69,17 @@ const Twitter = new class {
   }
 
   api(path, data) {
-    const that = this, service = this.oauth.service();
+    const that = this,
+      service = this.oauth.service();
     if (!service.hasAccess()) {
-      Logger.log('先にOAuth認証してください');
+      Logger.log("先にOAuth認証してください");
       return false;
     }
 
-    path = path.toLowerCase().replace(/^\//, '').replace(/\.json$/, '');
+    path = path
+      .toLowerCase()
+      .replace(/^\//, "")
+      .replace(/\.json$/, "");
 
     // TODO: video upload
     if (path == "media/upload") {
@@ -82,34 +88,47 @@ const Twitter = new class {
       this.apiUrl = "https://api.twitter.com/1.1/";
     }
 
-    const method = (
-      /^statuses\/(destroy\/\d+|update|retweet\/\d+)/.test(path)
-      || /^media\/upload/.test(path)
-      || /^direct_messages\/(destroy|new)/.test(path)
-      || /^friendships\/(create|destroy|update)/.test(path)
-      || /^account\/(settings|update|remove)/.test(path)
-      || /^blocks\/(create|destroy)/.test(path)
-      || /^mutes\/users\/(create|destroy)/.test(path)
-      || /^favorites\/(destroy|create)/.test(path)
-      || /^lists\/[^\/]+\/(destroy|create|update)/.test(path)
-      || /^saved_searches\/(create|destroy)/.test(path)
-      || /^geo\/place/.test(path)
-      || /^users\/report_spam/.test(path)
-    ) ? "post" : "get";
+    const method =
+      /^statuses\/(destroy\/\d+|update|retweet\/\d+)/.test(path) ||
+      /^media\/upload/.test(path) ||
+      /^direct_messages\/(destroy|new)/.test(path) ||
+      /^friendships\/(create|destroy|update)/.test(path) ||
+      /^account\/(settings|update|remove)/.test(path) ||
+      /^blocks\/(create|destroy)/.test(path) ||
+      /^mutes\/users\/(create|destroy)/.test(path) ||
+      /^favorites\/(destroy|create)/.test(path) ||
+      /^lists\/[^\/]+\/(destroy|create|update)/.test(path) ||
+      /^saved_searches\/(create|destroy)/.test(path) ||
+      /^geo\/place/.test(path) ||
+      /^users\/report_spam/.test(path)
+        ? "post"
+        : "get";
 
     let url = this.apiUrl + path + ".json";
     const options = {
       method: method,
-      muteHttpExceptions: true
+      muteHttpExceptions: true,
     };
 
     if ("get" === method) {
       if (!this.isEmpty(data)) {
-        url += '?' + Object.keys(data).map(key => that.encodeRfc3986(key) + '=' + that.encodeRfc3986(data[key])).join('&');
+        url +=
+          "?" +
+          Object.keys(data)
+            .map(
+              (key) =>
+                that.encodeRfc3986(key) + "=" + that.encodeRfc3986(data[key])
+            )
+            .join("&");
       }
     } else if ("post" == method) {
       if (!this.isEmpty(data)) {
-        options.payload = Object.keys(data).map(key => that.encodeRfc3986(key) + '=' + that.encodeRfc3986(data[key])).join('&');
+        options.payload = Object.keys(data)
+          .map(
+            (key) =>
+              that.encodeRfc3986(key) + "=" + that.encodeRfc3986(data[key])
+          )
+          .join("&");
         if (data.media) {
           options.contentType = "multipart/form-data;charset=UTF-8";
         }
@@ -141,8 +160,14 @@ const Twitter = new class {
 
   error(error) {
     let message = null;
-    if ('object' === typeof error && error.message) {
-      message = error.message + " ('" + error.fileName + '.gs:' + error.lineNumber + ")";
+    if ("object" === typeof error && error.message) {
+      message =
+        error.message +
+        " ('" +
+        error.fileName +
+        ".gs:" +
+        error.lineNumber +
+        ")";
     } else {
       message = error;
     }
@@ -160,7 +185,9 @@ const Twitter = new class {
   }
 
   encodeRfc3986(str) {
-    return encodeURIComponent(str).replace(/[!'()]/g, (char) => escape(char)).replace(/\*/g, "%2A");
+    return encodeURIComponent(str)
+      .replace(/[!'()]/g, (char) => escape(char))
+      .replace(/\*/g, "%2A");
   }
 
   // *** TwitterAPI ***
@@ -192,18 +219,18 @@ const Twitter = new class {
       data = { q: data };
     }
     return this.api("search/tweets", data);
-  };
+  }
 
   // 自分のタイムライン取得
   timeLine(since_id) {
     let data = null;
-    if ("number" === typeof since_id || /^\d+$/.test('' + since_id)) {
+    if ("number" === typeof since_id || /^\d+$/.test("" + since_id)) {
       data = { since_id: since_id };
     } else if ("object" === typeof since_id) {
       data = since_id;
     }
     return this.api("statuses/home_timeline", data);
-  };
+  }
 
   // ユーザーのタイムライン取得
   userTimeLine(user, since_id, count = 10) {
@@ -211,7 +238,7 @@ const Twitter = new class {
     const data = {};
     data.count = count; // 取得する数（最大数）
     data.include_rts = false; // RTを含めるか
-    data.tweet_mode = 'extended';
+    data.tweet_mode = "extended";
 
     if (user) {
       if (/^\d+$/.test(user)) {
@@ -226,7 +253,7 @@ const Twitter = new class {
       data.since_id = since_id;
     }
     return this.api(path, data);
-  };
+  }
 
   // ツイートする
   tweet(data, reply) {
@@ -240,7 +267,7 @@ const Twitter = new class {
       data.in_reply_to_status_id = reply;
     }
     return this.api(path, data);
-  };
+  }
 
   // ツイートを取得
   showTweet(tweet_id) {
@@ -250,4 +277,4 @@ const Twitter = new class {
   }
 
   // *** ↓ API呼び出し口を追加 ***
-}();
+})();
