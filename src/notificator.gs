@@ -248,6 +248,10 @@ const updateNewRepliedTweets = (query = `@${SCREEN_NAME} -rt`) => {
 /**
  * misc
  */
+function getSheetByName(name) {
+  return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
+}
+
 // 配列の最大値のインデックスを返す
 function maxIndex(arr) {
   let index = 0;
