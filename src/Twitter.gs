@@ -41,9 +41,9 @@ class MyOAuth {
     const service = this.service();
     const isAuthorized = service.handleCallback(request);
     if (isAuthorized) {
-      return HtmlService.createHtmlOutput(Dict.oauth.authorized);
+      return HtmlService.createHtmlOutput('認証に成功しました。このタブは閉じて構いません。');
     } else {
-      return HtmlService.createHtmlOutput(Dict.oauth.rejected);
+      return HtmlService.createHtmlOutput('認証に失敗しました。');
     }
   }
 
@@ -69,7 +69,7 @@ const Twitter = new class {
   api(path, data) {
     const that = this, service = this.oauth.service();
     if (!service.hasAccess()) {
-      Logger.log(Dict.twitter.loginRejected);
+      Logger.log('先にOAuth認証してください');
       return false;
     }
 
